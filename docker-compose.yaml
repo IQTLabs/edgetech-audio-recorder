@@ -1,0 +1,12 @@
+version: "3"
+services:
+  audio-recorder:
+    image: iqtlabs/edgetech-audio-recorder:${SERVICES_IMAGE_TAG:-stable}
+    restart: always
+    network_mode: "none"
+    environment:
+      - "HOSTNAME=${HOSTNAME}"
+    volumes:
+      - "/flash/telemetry/hydrophone:/flash/telemetry/hydrophone"
+    devices:
+      - "/dev/snd:/dev/snd"
