@@ -17,6 +17,8 @@ class audioRecorder(BaseMQTTPubSub):
         self.timestamp=int(time.time())
 
         os.makedirs(self.flacdir) if not os.path.exists(self.flacdir)
+
+        # TODO: make gain a variable
         os.popen("/usr/bin/amixer sset ADC 40db")
         
         if mqttIP:
@@ -37,15 +39,27 @@ class audioRecorder(BaseMQTTPubSub):
         def recordAudio(self):
             self.timestamp=int(time.time())
             self.flacout=f'{self.hostname}-{self.timestamp}-hydrophone.flac'
-            self.savedest=f'{self.flacdir}/.{self.flacout}'
+            self.save_dest=f'{self.flacdir}/.{self.flacout}'
+
+            bash_cmd=f'arecord -q -D sysdefault -r 44100 -d 600 -f S16 -V mono - | ffmpeg -i - -y -ac 1 -ar 44100 -sample_fmt s16 {save_dest}'
             # TODO: Not sure if this is the best way to do this
-            rec_process=os.subprocess.Popen(["arecord", "-q", "-D", "sysdefault", "-r", "44100", "-d", "600", "-f", "S16", \
-                "-V", "mono", "-", "|", "ffmpeg", "-i", "-", "-y", "-ac", "1", "-ar", "44100", "-sample_fmt", "s16", savedest])
+            self.rec_process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+            #rec_process=os.subprocess.Popen(["arecord", "-q", "-D", "sysdefault", "-r", "44100", "-d", "600", "-f", "S16", \
+            #    "-V", "mono", "-", "|", "ffmpeg", "-i", "-", "-y", "-ac", "1", "-ar", "44100", "-sample_fmt", "s16", savedest])
             while rec_process != None:
                 time.sleep(0.001)
             # TODO: add exceptions and notifications for record/subprocess failure
             self.sendData(self, f'saved audio file at {self.savedest}')
             return rec_process
+
+        def stopRecordAudio(self):
+            # kill sends the signal signal.SIGKILL to the process and terminate sends signal.SIGTERM
+            try:
+                self.rec_process.kill()
+                self.sendData(self, f' audio file stopped')
+            except:
+                self.sendData(self, f' audio file could not be stopped')
+
 
         def main(self):
             running = True

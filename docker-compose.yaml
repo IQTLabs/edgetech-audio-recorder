@@ -7,6 +7,6 @@ services:
     environment:
       - "HOSTNAME=${HOSTNAME}"
     volumes:
-      - "/flash/telemetry/hydrophone:/flash/telemetry/hydrophone"
+      - "./data:/flash/telemetry/hydrophone"
     devices:
       - "/dev/snd:/dev/snd"
