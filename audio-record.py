@@ -15,11 +15,13 @@ class audioRecorder(BaseMQTTPubSub):
         self.flacdir="/flash/telemetry/hydrophone"
         self.hostname=os.environ["HOSTNAME"]
         self.timestamp=int(time.time())
+        self.rec_time=600
+        self.gain=40
 
         os.makedirs(self.flacdir) if not os.path.exists(self.flacdir)
 
         # TODO: make gain a variable
-        os.popen("/usr/bin/amixer sset ADC 40db")
+        os.popen(f'/usr/bin/amixer sset ADC {gain}db')
         
         if mqttIP:
             self.client_connection_parameters['IP'] = mqttIP
@@ -36,12 +38,12 @@ class audioRecorder(BaseMQTTPubSub):
             if self.verbose:
                 print(f'Sent data on channel {self.dataChannel}: {json.dumps(data)}')
 
-        def recordAudio(self):
+        def recordAudio(self):s
             self.timestamp=int(time.time())
             self.flacout=f'{self.hostname}-{self.timestamp}-hydrophone.flac'
             self.save_dest=f'{self.flacdir}/.{self.flacout}'
 
-            bash_cmd=f'arecord -q -D sysdefault -r 44100 -d 600 -f S16 -V mono - | ffmpeg -i - -y -ac 1 -ar 44100 -sample_fmt s16 {save_dest}'
+            bash_cmd=f'arecord -q -D sysdefault -r 44100 -d {self.rec_time} -f S16 -V mono - | ffmpeg -i - -y -ac 1 -ar 44100 -sample_fmt s16 {self.save_dest}'
             # TODO: Not sure if this is the best way to do this
             self.rec_process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
             #rec_process=os.subprocess.Popen(["arecord", "-q", "-D", "sysdefault", "-r", "44100", "-d", "600", "-f", "S16", \

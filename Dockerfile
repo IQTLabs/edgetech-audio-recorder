@@ -1,10 +1,10 @@
 # nosemgrep:github.workflows.config.dockerfile-source-not-pinned
-FROM python:3.11
+FROM python:3.11-slim
 ##RUN apk update && apk add alsa-utils alsa-utils-doc alsa-lib alsaconf alsa-ucm-conf bash ffmpeg
 RUN apt update && apt install -y alsa-utils alsa-tools ffmpeg
 RUN addgroup root audio
 COPY asound.conf /etc/asound.conf
-COPY record.sh /record.sh
+COPY audio-record.py /audio-record.py
 ARG VERSION
 ENV VERSION $VERSION
 # nosemgrep:github.workflows.config.missing-user

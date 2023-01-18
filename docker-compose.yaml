@@ -1,7 +1,7 @@
 version: "3"
 services:
   audio-recorder:
-    image: iqtlabs/edgetech-audio-recorder:${SERVICES_IMAGE_TAG:-stable}
+    image: iqtlabs/edgetech-audio-recorder:latest
     restart: always
     network_mode: "none"
     environment:
