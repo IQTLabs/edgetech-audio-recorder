@@ -61,16 +61,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self._record_audio()
 
     def _send_data(self, data) -> None:
-        success = self.publish_to_topic(self.send_data_topic, json.dumps(data))
-
-        if success:
-            print(
-                f"Successfully sent data on channel {self.send_data_topic}: {json.dumps(data)}"
-            )
-        else:
-            print(
-                f"Failed to send data on channel {self.send_data_topic}: {json.dumps(data)}"
-            )
+        self.publish_to_topic(self.send_data_topic, json.dumps(data))
 
     def _record_audio(self: Any) -> None:
         self.file_timestamp = str(int(datetime.utcnow().timestamp()))
@@ -96,26 +87,37 @@ class AudioPubSub(BaseMQTTPubSub):
             ffmpeg_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
 
-        delete_cmd = f"echo 1234 | sudo rm {self.temp_file_path}"
-        subprocess.Popen(
-            delete_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
-
-        self._send_data(f"saved audio file at {self.file_name}")
-
     def _c2c_callback(
         self: Any, _client: mqtt.Client, _userdata: Dict[Any, Any], msg: Any
     ) -> None:
         c2c_payload = json.loads(str(msg.payload.decode("utf-8")))
         if c2c_payload["msg"] == "NEW FILE":
             self._stop_record_audio()
+            self._send_data(f"saved audio file at {self.file_name}")
             self._record_audio()
+
+    def _cleanup_temp_files(self: Any) -> None:
+        self._send_data(f"FILES: {os.listdir(self.save_path)}")
+        temp_files_ls = [
+            *filter(
+                lambda file: file.endswith(self.temp_file_suffix),
+                os.listdir(self.save_path),
+            )
+        ]
+        self._send_data(f"TEMP FILES: {temp_files_ls}")
+        temp_files_ls.sort(key = lambda x: int(x.split("_")[0]))
+        to_delete_ls = temp_files_ls[:-2]
+        self._send_data(f"TO DELETE: {to_delete_ls}")
+        for file in to_delete_ls:
+            os.remove(os.path.join(self.save_path, file))
 
     def main(self: Any) -> None:
 
         schedule.every(10).seconds.do(
             self.publish_heartbeat, payload="Audio Recorder Heartbeat"
         )
+
+        schedule.every(15).minutes.do(self._cleanup_temp_files)
 
         self.add_subscribe_topic(self.c2c_topic, self._c2c_callback)
 
