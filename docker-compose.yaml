@@ -1,12 +1,26 @@
 version: "3"
 services:
+  mqtt:
+    image: iqtlabs/edgetech-mqtt:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    restart: unless-stopped
   audio-recorder:
     image: iqtlabs/edgetech-audio-recorder:latest
-    restart: always
-    network_mode: "none"
+    build:
+      context: ../edgetech-audio-recorder/audiorecorder
+      dockerfile: ./Dockerfile
     environment:
-      - "HOSTNAME=${HOSTNAME}"
-    volumes:
-      - "./data:/flash/telemetry/hydrophone"
     devices:
       - "/dev/snd:/dev/snd"
+    restart: unless-stopped
+    environment:
+      - SEND_DATA_TOPIC=/AISonobuoy/<HOSTNAME>/Audio/edgetech-audio-recorder/string
+      - C2_TOPIC=/AISonobuoy/<HOSTNAME>/C2/edgetech-c2/string
+      - DATA_ROOT=/sensor-data
+      - SENSOR_DIR=audio
+      - FILE_PREFIX=hydrophone_audio_
+      - MQTT_IP=mqtt
+    volumes:
+      - /home/mobian/sensor-data:/sensor-data
