@@ -9,7 +9,7 @@ services:
   audio-recorder:
     image: iqtlabs/edgetech-audio-recorder:latest
     build:
-      context: ../edgetech-audio-recorder/audiorecorder
+      context: ./audiorecorder
       dockerfile: ./Dockerfile
     environment:
     devices:

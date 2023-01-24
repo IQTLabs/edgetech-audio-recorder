@@ -67,13 +67,10 @@ class AudioPubSub(BaseMQTTPubSub):
         self.file_timestamp = str(int(datetime.utcnow().timestamp()))
         self.temp_file_name = self.file_timestamp + self.temp_file_suffix
         self.temp_file_path = os.path.join(self.save_path, self.temp_file_name)
-
         rec_cmd = (
             f"arecord -q -D sysdefault -r 44100 -f S16 -V mono {self.temp_file_path}"
         )
-        self.record_process = subprocess.Popen(
-            rec_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        self.record_process = subprocess.Popen(rec_cmd.split())
 
     def _stop_record_audio(self: Any) -> None:
         self.record_process.kill()
@@ -83,9 +80,7 @@ class AudioPubSub(BaseMQTTPubSub):
 
         ffmpeg_cmd = f"ffmpeg -i {self.temp_file_path} -y -ac 1 -ar 44100 \
         -sample_fmt s16 {self.file_path}"
-        subprocess.Popen(
-            ffmpeg_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        subprocess.Popen(ffmpeg_cmd.split())
 
     def _c2c_callback(
         self: Any, _client: mqtt.Client, _userdata: Dict[Any, Any], msg: Any
@@ -93,7 +88,12 @@ class AudioPubSub(BaseMQTTPubSub):
         c2c_payload = json.loads(str(msg.payload.decode("utf-8")))
         if c2c_payload["msg"] == "NEW FILE":
             self._stop_record_audio()
-            self._send_data(f"saved audio file at {self.file_name}")
+            self._send_data(
+                {
+                    "timestamp": str(int(datetime.utcnow().timestamp())),
+                    "data": f"/home/mobian{self.file_path}",
+                }
+            )
             self._record_audio()
 
     def _cleanup_temp_files(self: Any) -> None:
@@ -105,7 +105,7 @@ class AudioPubSub(BaseMQTTPubSub):
             )
         ]
         self._send_data(f"TEMP FILES: {temp_files_ls}")
-        temp_files_ls.sort(key = lambda x: int(x.split("_")[0]))
+        temp_files_ls.sort(key=lambda x: int(x.split("_")[0]))
         to_delete_ls = temp_files_ls[:-2]
         self._send_data(f"TO DELETE: {to_delete_ls}")
         for file in to_delete_ls:
