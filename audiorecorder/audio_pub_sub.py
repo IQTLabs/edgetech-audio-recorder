@@ -61,7 +61,21 @@ class AudioPubSub(BaseMQTTPubSub):
         self._record_audio()
 
     def _send_data(self, data) -> None:
-        self.publish_to_topic(self.send_data_topic, json.dumps(data))
+        out_json = self.generate_payload_json(
+            push_timestamp=int(datetime.utcnow().timestamp()),
+            device_type="Collector",
+            id_="TEST",
+            deployment_id=f"AISonobuoy-Arlington-{'TEST'}",
+            current_location="-90, -180",
+            status="Debug",
+            message_type="Event",
+            model_version="null",
+            firmware_version="v0.0.0",
+            data_payload_type="AudioFileName",
+            data_payload=json.dumps(data),
+        )
+
+        self.publish_to_topic(self.send_data_topic, json.dumps(out_json))
 
     def _record_audio(self: Any) -> None:
         self.file_timestamp = str(int(datetime.utcnow().timestamp()))
@@ -97,17 +111,17 @@ class AudioPubSub(BaseMQTTPubSub):
             self._record_audio()
 
     def _cleanup_temp_files(self: Any) -> None:
-        self._send_data(f"FILES: {os.listdir(self.save_path)}")
+
         temp_files_ls = [
             *filter(
                 lambda file: file.endswith(self.temp_file_suffix),
                 os.listdir(self.save_path),
             )
         ]
-        self._send_data(f"TEMP FILES: {temp_files_ls}")
+
         temp_files_ls.sort(key=lambda x: int(x.split("_")[0]))
         to_delete_ls = temp_files_ls[:-2]
-        self._send_data(f"TO DELETE: {to_delete_ls}")
+
         for file in to_delete_ls:
             os.remove(os.path.join(self.save_path, file))
 
