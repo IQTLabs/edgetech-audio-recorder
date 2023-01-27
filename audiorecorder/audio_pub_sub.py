@@ -75,7 +75,7 @@ class AudioPubSub(BaseMQTTPubSub):
             data_payload=json.dumps(data),
         )
 
-        self.publish_to_topic(self.send_data_topic, json.dumps(out_json))
+        self.publish_to_topic(self.send_data_topic, out_json)
 
     def _record_audio(self: Any) -> None:
         self.file_timestamp = str(int(datetime.utcnow().timestamp()))
