@@ -1,4 +1,5 @@
-"""_summary_
+"""_his file contains the AudioPubSub class which is a child class of BaseMQTTPubSub.
+The AudioPubSub uses arecord and ffmpeg to record and save audio as .flac files.
 """
 import json
 import os
@@ -31,7 +32,10 @@ class AudioPubSub(BaseMQTTPubSub):
         debug: bool = False,
         **kwargs: Any,
     ) -> None:
-        """_summary_
+        """The AudioPubSub constructor takes broadcast and subscribe topics and file paths.
+        It uses arecord and ffmpeg to record .wav files and then convert them to .flac files
+        after instantiating a connection to the MQTT broker and subscribes to the C2 topic
+        to cycle files.
 
         Args:
             send_data_topic (str): the topic to broadcast the new file path every time
