@@ -71,6 +71,8 @@ class AudioPubSub(BaseMQTTPubSub):
         os.makedirs(self.save_path, exist_ok=True)
 
         # set gain
+        os.makedirs(self.save_path, exist_ok=True)
+
         gain_cmd = f"/usr/bin/amixer sset ADC {30}db"
         gain_process = subprocess.Popen(
             gain_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -171,6 +173,7 @@ class AudioPubSub(BaseMQTTPubSub):
             # stop recording + compress
             self._stop_record_audio()
             # send compressed filename
+
             self._send_data(
                 {
                     "timestamp": str(int(datetime.utcnow().timestamp())),
@@ -208,6 +211,7 @@ class AudioPubSub(BaseMQTTPubSub):
         main thread alive.
         """
         # publish hearbeat every 10 seconds to keep TCP/IP connection alive
+
         schedule.every(10).seconds.do(
             self.publish_heartbeat, payload="Audio Recorder Heartbeat"
         )
