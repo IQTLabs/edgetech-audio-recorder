@@ -45,7 +45,7 @@ class AudioPubSub(BaseMQTTPubSub):
             sensor_directory_name (str): the directory name to create in the data_root where
             the files will be saved.
             file_prefix (str): the fixed beginning of each filename.
-            debug (bool, optional): _description_. Defaults to False.
+            debug (bool, optional): If the debug mode is turned on, log statements print to stdout. Defaults to False.
         """
         # to override any keyword arguments in the base class
         super().__init__(**kwargs)
