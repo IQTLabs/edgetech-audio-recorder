@@ -9,18 +9,19 @@ services:
   audio-recorder:
     image: iqtlabs/edgetech-audio-recorder:latest
     build:
-      context: ./audiorecorder
+      context: ./audior-ecorder
       dockerfile: ./Dockerfile
-    environment:
     devices:
       - "/dev/snd:/dev/snd"
     restart: unless-stopped
-    environment:
-      - SEND_DATA_TOPIC=/AISonobuoy/<HOSTNAME>/Audio/edgetech-audio-recorder/string
-      - C2_TOPIC=/AISonobuoy/<HOSTNAME>/C2/edgetech-c2/string
-      - DATA_ROOT=/sensor-data
-      - SENSOR_DIR=audio
-      - FILE_PREFIX=hydrophone_audio_
-      - MQTT_IP=mqtt
     volumes:
       - /home/mobian/sensor-data:/sensor-data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10M"
+        max-file: "10"
+    depends_on: 
+      - mqtt
+    env_file:
+      - .env
