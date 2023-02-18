@@ -77,11 +77,9 @@ flowchart TD
     c2(C2) -- Command & Control Topic --> mqtt{MQTT}
     mqtt{MQTT} -- Subscribed to Command & Control Topic --> audiorecorder(Audio Recorder)
     audiorecorder(Audio Recorder) -- Recorded Audio File Topic --> mqtt{MQTT}
-    mqtt{MQTT} -- Subscribed to Recorded Audio File Topic --> filesaver(filesaver)
 
 style mqtt fill:#0072bc,color:#ffffff
 style audiorecorder fill:#80c342,color:#ffffff
-style filesaver fill:#F9D308,color:#ffffff
 style c2 fill:#f05343,color:#ffffff
 
 ```
