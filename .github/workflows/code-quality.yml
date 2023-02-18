@@ -1,7 +1,5 @@
 name: Code Quality Checks
-on:
-  pull_request:
-      types: [ "opened", "edited" ]
+on: [push, pull_request]
 
 jobs:
   build:
