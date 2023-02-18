@@ -51,7 +51,7 @@ class AudioPubSub(BaseMQTTPubSub):
         # to override any keyword arguments in the base class
         super().__init__(**kwargs)
 
-        # assigining class attributes
+        # assigning class attributes
         self.send_data_topic = send_data_topic
         self.debug = debug
         self.c2_topic = c2_topic
@@ -162,10 +162,10 @@ class AudioPubSub(BaseMQTTPubSub):
         """Callback for the C2 topic which currently triggers the changing of files to write to.
 
         Args:
-            _client (mqtt.Client): the MQTT client that was instatntiated in the constructor.
+            _client (mqtt.Client): the MQTT client that was instantiated in the constructor.
             _userdata (Dict[Any,Any]): data passed to the callback through the MQTT paho Client
-            class contructor or set later through user_data_set().
-            msg (Any): the recieved message over the subscribed channel that includes
+            class constructor or set later through user_data_set().
+            msg (Any): the received message over the subscribed channel that includes
             the topic name and payload after decoding. The messages here will include the
             sensor data to save.
         """
@@ -215,7 +215,7 @@ class AudioPubSub(BaseMQTTPubSub):
         connection alive and publishes the data to the MQTT broker and keeps the
         main thread alive.
         """
-        # publish hearbeat every 10 seconds to keep TCP/IP connection alive
+        # publish heartbeat every 10 seconds to keep TCP/IP connection alive
 
         schedule.every(10).seconds.do(
             self.publish_heartbeat, payload="Audio Recorder Heartbeat"
@@ -229,7 +229,7 @@ class AudioPubSub(BaseMQTTPubSub):
 
         while True:
             try:
-                # flusing pending scheduled tasks
+                # flushing pending scheduled tasks
                 schedule.run_pending()
                 sleep(0.001)
             except KeyboardInterrupt as exception:
