@@ -240,11 +240,11 @@ class AudioPubSub(BaseMQTTPubSub):
 
 if __name__ == "__main__":
     recorder = AudioPubSub(
-        send_data_topic=str(os.environ.get("SEND_DATA_TOPIC")),
+        send_data_topic=str(os.environ.get("AUDIO_SEND_DATA_TOPIC")),
         c2_topic=str(os.environ.get("C2_TOPIC")),
         data_root=str(os.environ.get("DATA_ROOT")),
-        sensor_directory_name=str(os.environ.get("SENSOR_DIR")),
-        file_prefix=str(os.environ.get("FILE_PREFIX")),
+        sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
+        file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
         mqtt_ip=str(os.environ.get("MQTT_IP")),
     )
     recorder.main()
