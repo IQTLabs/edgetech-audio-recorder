@@ -34,7 +34,7 @@
 <h1 align="center">EdgeTech-Audio-Recorder</h1>
 
   <p align="center">
-    This repo builds upon the <a href="https://github.com/IQTLabs/edgetech-core">IQT Labs EdgeTech-Core</a> functionality to instantiate an <a href="https://projects.eclipse.org/projects/iot.mosquitto">MQTT</a> client that uses <a href="https://linux.die.net/man/1/arecord">arecord</a> and <a href="https://ffmpeg.org/ffmpeg.html">ffmpeg</a> to record and compress audio into `.flac` files. Functionality is also included to respond to a <a href="https://github.com/IQTLabs/edgetech-c2">Command and Control</a> module to cycle to the next file. All of this functionality is wrapped in a Docker container for cross-platform compatibility. 
+    This repo builds upon the <a href="https://github.com/IQTLabs/edgetech-core">IQT Labs EdgeTech-Core</a> functionality to instantiate an <a href="https://projects.eclipse.org/projects/iot.mosquitto">MQTT</a> client that uses <a href="https://linux.die.net/man/1/arecord">arecord</a> and <a href="https://ffmpeg.org/ffmpeg.html">ffmpeg</a> to record and compress audio into .flac files. Functionality is also included to respond to a <a href="https://github.com/IQTLabs/edgetech-c2">Command and Control</a> module to cycle to the next file. All of this functionality is wrapped in a Docker container for cross-platform compatibility. 
     <br/>
     <br/>
     <a href="https://github.com/IQTLabs/edgetech-audio-recorder/pulls">Make Contribution</a>
