@@ -29,6 +29,7 @@ class AudioPubSub(BaseMQTTPubSub):
         data_root: str,
         sensor_directory_name: str,
         file_prefix: str,
+        hostname: str,
         debug: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -56,6 +57,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self.debug = debug
         self.c2_topic = c2_topic
         self.save_path = os.path.join(data_root, sensor_directory_name)
+        self.hostname = hostname
 
         # compressed file related class attributes
         self.file_prefix = file_prefix
@@ -108,8 +110,8 @@ class AudioPubSub(BaseMQTTPubSub):
         out_json = self.generate_payload_json(
             push_timestamp=str(int(datetime.utcnow().timestamp())),
             device_type="Collector",
-            id_="TEST",
-            deployment_id=f"AISonobuoy-Arlington-{'TEST'}",
+            id_=self.hostname,
+            deployment_id=f"AISonobuoy-Arlington-{self.hostname}",
             current_location="-90, -180",
             status="Debug",
             message_type="Event",
@@ -245,6 +247,7 @@ if __name__ == "__main__":
         data_root=str(os.environ.get("DATA_ROOT")),
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
+        hostname=str(os.environ.get("HOSTNAME")),
         mqtt_ip=str(os.environ.get("MQTT_IP")),
     )
     recorder.main()
