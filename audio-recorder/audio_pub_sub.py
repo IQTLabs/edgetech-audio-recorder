@@ -1,6 +1,7 @@
 """This file contains the AudioPubSub class which is a child class of BaseMQTTPubSub.
 The AudioPubSub uses arecord and ffmpeg to record and save audio as .flac files.
 """
+import base64
 import json
 import os
 from time import sleep
@@ -13,6 +14,20 @@ import paho.mqtt.client as mqtt
 
 from base_mqtt_pub_sub import BaseMQTTPubSub
 
+# TODOs:
+# - Terminology "Args" for base class in class definition?
+# - Terminology "class" rather than "instance" attributes?
+# - Follow PEP 8 – Style Guide for Python Code?
+# - Review whitespace?
+# - Use pathlib?
+# - Use logging?
+# - Return success, or not, when publishing?
+# - Does type(bytes.decode()) == str?
+# - Hard code parameter values?
+# - Add a factory method?
+# - Remove unused timestamp from dictionary argument to _send_data()
+# - Does os.environ.get() returns str?
+# - Provide default values when getting environment variable values?
 
 class AudioPubSub(BaseMQTTPubSub):
     """The AudioPubSub uses arecord + ffmpeg to record and save .wav audio recordings that
@@ -24,7 +39,8 @@ class AudioPubSub(BaseMQTTPubSub):
 
     def __init__(
         self: Any,
-        send_data_topic: str,
+        audio_filename_topic: str,
+        audio_clip_topic: str,
         c2_topic: str,
         data_root: str,
         sensor_directory_name: str,
@@ -39,8 +55,10 @@ class AudioPubSub(BaseMQTTPubSub):
         to cycle files.
 
         Args:
-            send_data_topic (str): the topic to broadcast the new file path every time
+            audio_filename_topic (str): the topic to broadcast the new file path every time
             generating a new file is triggered.
+            audio_clip_topic (str): the topic to broadcast the audio clip every time generating
+            a new file is triggered.
             c2_topic (str): the command and control topic that triggers writing to a new file.
             data_root (str): the parent directory to save the audio files to.
             sensor_directory_name (str): the directory name to create in the data_root where
@@ -53,7 +71,8 @@ class AudioPubSub(BaseMQTTPubSub):
         super().__init__(**kwargs)
 
         # assigning class attributes
-        self.send_data_topic = send_data_topic
+        self.audio_filename_topic = audio_filename_topic
+        self.audio_clip_topic = audio_clip_topic
         self.debug = debug
         self.c2_topic = c2_topic
         self.save_path = os.path.join(data_root, sensor_directory_name)
@@ -117,12 +136,18 @@ class AudioPubSub(BaseMQTTPubSub):
             message_type="Event",
             model_version="null",
             firmware_version="v0.0.0",
-            data_payload_type="AudioFileName",
-            data_payload=json.dumps(data),
+            data_payload_type=data["type"],
+            data_payload=data["payload"],
         )
 
         # publish payload w/ header
-        self.publish_to_topic(self.send_data_topic, out_json)
+        if data["type"] == "AudioFileName":
+            send_data_topic = self.audio_filename_topic
+
+        elif data["type"] == "AudioClip":
+            send_data_topic = self.audio_clip_topic
+
+        self.publish_to_topic(send_data_topic, out_json)
 
     def _record_audio(self: Any) -> None:
         """This function builds the save path for the temporary .wav file and calls arecord to
@@ -181,12 +206,24 @@ class AudioPubSub(BaseMQTTPubSub):
             self._stop_record_audio()
             # send compressed filename
 
+            clip_path = f"/home/mobian{self.file_path}"
             self._send_data(
                 {
                     "timestamp": str(int(datetime.utcnow().timestamp())),
-                    "data": f"/home/mobian{self.file_path}",
+                    "type": "AudioFileName",
+                    "payload": clip_path,
                 }
             )
+
+            encoded_clip = self._encode_clip(clip_path)
+            self._send_data(
+                {
+                    "timestamp": str(int(datetime.utcnow().timestamp())),
+                    "type": "AudioClip",
+                    "payload": encoded_clip,
+                }
+            )
+
             # start a new recording
             self._record_audio()
 
@@ -211,6 +248,31 @@ class AudioPubSub(BaseMQTTPubSub):
         # delete each file in the list
         for file in to_delete_ls:
             os.remove(os.path.join(self.save_path, file))
+
+    def _encode_clip(self, clip_filepath: str) -> str:
+        """Base64 encode an audio clip from a file.
+
+        Args:
+            clip_filepath (str): Path of the clip file
+
+        Returns:
+            encoded_image (str): The Base64 encoded clip as an ASCII string
+        """
+        with open(clip_filepath, "rb") as clip_file:
+            encoded_clip = base64.b64encode(clip_file.read()).decode()
+        return encoded_clip
+
+    def _decode_clip(self, encoded_clip: str) -> bytes:
+        """Base64 decode an audio clip from an ASCII string.
+
+        Args:
+            encoded_clip (str): A Base64 encoded clip as an ASCII string
+
+        Returns:
+            decoded_clip (bytes): The Base64 decoded clip
+        """
+        decoded_clip = base64.b64decode(encoded_clip)
+        return decoded_clip
 
     def main(self: Any) -> None:
         """Main loop and function that setup the heartbeat to keep the TCP/IP
@@ -242,7 +304,8 @@ class AudioPubSub(BaseMQTTPubSub):
 
 if __name__ == "__main__":
     recorder = AudioPubSub(
-        send_data_topic=str(os.environ.get("AUDIO_SEND_DATA_TOPIC")),
+        audio_filename_topic=str(os.environ.get("AUDIO_FILENAME_TOPIC")),
+        audio_clip_topic=str(os.environ.get("AUDIO_CLIP_TOPIC")),
         c2_topic=str(os.environ.get("C2_TOPIC")),
         data_root=str(os.environ.get("DATA_ROOT")),
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
