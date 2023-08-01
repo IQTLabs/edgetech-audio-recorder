@@ -29,6 +29,7 @@ from base_mqtt_pub_sub import BaseMQTTPubSub
 # - Does os.environ.get() returns str?
 # - Provide default values when getting environment variable values?
 
+
 class AudioPubSub(BaseMQTTPubSub):
     """The AudioPubSub uses arecord + ffmpeg to record and save .wav audio recordings that
     are compressed to .flac files. Files are cycled by responding to C2 commands.
