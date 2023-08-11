@@ -1,6 +1,6 @@
 FROM iqtlabs/edgetech-core:latest
 RUN apt update && apt install -y alsa-utils alsa-tools ffmpeg libportaudio2
-RUN addgroup root audio
+# RUN addgroup root audio
 COPY asound.conf /etc/asound.conf
 COPY pyproject.toml .
 COPY poetry.lock .
