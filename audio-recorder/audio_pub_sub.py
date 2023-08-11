@@ -196,21 +196,19 @@ class AudioPubSub(BaseMQTTPubSub):
             self._stop_record_audio()
             # send compressed filename
 
-            clip_path = f"/home/mobian{self.file_path}"
             self._send_data(
                 {
                     "timestamp": str(int(datetime.utcnow().timestamp())),
                     "type": "AudioFileName",
-                    "payload": clip_path,
+                    "payload": self.temp_file_path,
                 }
             )
 
-            encoded_clip = self._encode_clip(clip_path)
             self._send_data(
                 {
                     "timestamp": str(int(datetime.utcnow().timestamp())),
                     "type": "AudioClip",
-                    "payload": encoded_clip,
+                    "payload": self._encode_clip(self.temp_file_path),
                 }
             )
 
