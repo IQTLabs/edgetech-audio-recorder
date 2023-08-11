@@ -151,9 +151,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self.temp_file_path = os.path.join(self.save_path, self.temp_file_name)
 
         # arecord command
-        rec_cmd = (
-            f"arecord -q -D {self.audio_device} -r 44100 -f S16 -V mono {self.temp_file_path}"
-        ) # TODO: fix the device to use sysetmdefault 
+        rec_cmd = f"arecord -q -D {self.audio_device} -r 44100 -f S16 -V mono {self.temp_file_path}"  # TODO: fix the device to use sysetmdefault
         # call command using python subprocess
         self.record_process = subprocess.Popen(rec_cmd.split())
 
