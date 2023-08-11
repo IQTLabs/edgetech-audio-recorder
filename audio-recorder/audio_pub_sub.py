@@ -15,19 +15,8 @@ import paho.mqtt.client as mqtt
 from base_mqtt_pub_sub import BaseMQTTPubSub
 
 # TODOs:
-# - Terminology "Args" for base class in class definition?
-# - Terminology "class" rather than "instance" attributes?
-# - Follow PEP 8 – Style Guide for Python Code?
-# - Review whitespace?
-# - Use pathlib?
-# - Use logging?
-# - Return success, or not, when publishing?
+# - Log success, or not, when publishing?
 # - Does type(bytes.decode()) == str?
-# - Hard code parameter values?
-# - Add a factory method?
-# - Remove unused timestamp from dictionary argument to _send_data()
-# - Does os.environ.get() returns str?
-# - Provide default values when getting environment variable values?
 
 
 class AudioPubSub(BaseMQTTPubSub):
@@ -46,6 +35,7 @@ class AudioPubSub(BaseMQTTPubSub):
         data_root: str,
         sensor_directory_name: str,
         file_prefix: str,
+        audio_device: str,
         hostname: str,
         debug: bool = False,
         **kwargs: Any,
@@ -76,6 +66,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self.audio_clip_topic = audio_clip_topic
         self.debug = debug
         self.c2_topic = c2_topic
+        self.audio_device = audio_device
         self.save_path = os.path.join(data_root, sensor_directory_name)
         self.hostname = hostname
 
@@ -161,8 +152,8 @@ class AudioPubSub(BaseMQTTPubSub):
 
         # arecord command
         rec_cmd = (
-            f"arecord -q -D sysdefault -r 44100 -f S16 -V mono {self.temp_file_path}"
-        )
+            f"arecord -q -D {self.audio_device} -r 44100 -f S16 -V mono {self.temp_file_path}"
+        ) # TODO: fix the device to use sysetmdefault 
         # call command using python subprocess
         self.record_process = subprocess.Popen(rec_cmd.split())
 
@@ -263,18 +254,6 @@ class AudioPubSub(BaseMQTTPubSub):
             encoded_clip = base64.b64encode(clip_file.read()).decode()
         return encoded_clip
 
-    def _decode_clip(self, encoded_clip: str) -> bytes:
-        """Base64 decode an audio clip from an ASCII string.
-
-        Args:
-            encoded_clip (str): A Base64 encoded clip as an ASCII string
-
-        Returns:
-            decoded_clip (bytes): The Base64 decoded clip
-        """
-        decoded_clip = base64.b64decode(encoded_clip)
-        return decoded_clip
-
     def main(self: Any) -> None:
         """Main loop and function that setup the heartbeat to keep the TCP/IP
         connection alive and publishes the data to the MQTT broker and keeps the
@@ -311,6 +290,7 @@ if __name__ == "__main__":
         data_root=str(os.environ.get("DATA_ROOT")),
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
+        audio_device=str(os.environ.get("AUDIO_DEVICE")),
         hostname=str(os.environ.get("HOSTNAME")),
         mqtt_ip=str(os.environ.get("MQTT_IP")),
     )
