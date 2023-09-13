@@ -109,6 +109,21 @@ class AudioPubSub(BaseMQTTPubSub):
         # trigger start recording audio
         self._record_audio()
 
+        # Log configuration parameters
+        logging.info(
+            f"""AudioPubSub initialized with parameters:
+    audio_filename_topic = {audio_filename_topic}
+    audio_clip_topic = {audio_clip_topic}
+    c2_topic = {c2_topic}
+    data_root = {data_root}
+    sensor_directory_name = {sensor_directory_name}
+    file_prefix = {file_prefix}
+    audio_device = {audio_device}
+    hostname = {hostname}
+    debug = {debug}
+            """
+        )
+
     def _send_data(self: Any, data: Dict[str, str]) -> None:
         """Function that takes a data payload containing a timestamp and the compressed audio
         file name, then publishes this to MQTT with a JSON header.
@@ -280,6 +295,8 @@ class AudioPubSub(BaseMQTTPubSub):
 
 if __name__ == "__main__":
     recorder = AudioPubSub(
+        hostname=str(os.environ.get("HOSTNAME")),
+        mqtt_ip=str(os.environ.get("MQTT_IP")),
         audio_filename_topic=str(os.environ.get("AUDIO_FILENAME_TOPIC")),
         audio_clip_topic=str(os.environ.get("AUDIO_CLIP_TOPIC")),
         c2_topic=str(os.environ.get("C2_TOPIC")),
@@ -287,7 +304,5 @@ if __name__ == "__main__":
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
         audio_device=str(os.environ.get("AUDIO_DEVICE")),
-        hostname=str(os.environ.get("HOSTNAME")),
-        mqtt_ip=str(os.environ.get("MQTT_IP")),
     )
     recorder.main()
