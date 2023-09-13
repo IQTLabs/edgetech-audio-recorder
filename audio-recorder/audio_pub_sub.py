@@ -3,6 +3,7 @@ The AudioPubSub uses arecord and ffmpeg to record and save audio as .flac files.
 """
 import base64
 import json
+import logging
 import os
 from time import sleep
 from datetime import datetime
