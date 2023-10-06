@@ -39,6 +39,7 @@ class AudioPubSub(BaseMQTTPubSub):
         audio_device: str,
         hostname: str,
         debug: bool = False,
+        log_level: str = "INFO",
         **kwargs: Any,
     ) -> None:
         """The AudioPubSub constructor takes broadcast and subscribe topics and file paths.
@@ -58,6 +59,8 @@ class AudioPubSub(BaseMQTTPubSub):
             file_prefix (str): the fixed beginning of each filename.
             debug (bool, optional): If the debug mode is turned on, log statements print to
             stdout. Defaults to False.
+            log_level (str): One of 'NOTSET', 'DEBUG', 'INFO', 'WARN',
+            'WARNING', 'ERROR', 'FATAL', 'CRITICAL'
         """
         # to override any keyword arguments in the base class
         super().__init__(**kwargs)
@@ -66,6 +69,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self.audio_filename_topic = audio_filename_topic
         self.audio_clip_topic = audio_clip_topic
         self.debug = debug
+        self.log_level = log_level
         self.c2_topic = c2_topic
         self.audio_device = audio_device
         self.save_path = os.path.join(data_root, sensor_directory_name)
@@ -122,6 +126,7 @@ class AudioPubSub(BaseMQTTPubSub):
     audio_device = {audio_device}
     hostname = {hostname}
     debug = {debug}
+    log_level = {log_level}
             """
         )
 
@@ -305,5 +310,6 @@ if __name__ == "__main__":
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
         audio_device=str(os.environ.get("AUDIO_DEVICE")),
+        log_level=os.environ.get("LOG_LEVEL"),
     )
     recorder.main()
