@@ -94,6 +94,7 @@ class AudioPubSub(BaseMQTTPubSub):
         os.makedirs(self.save_path, exist_ok=True)
 
         # set gain
+        # TODO: Remove?
         os.makedirs(self.save_path, exist_ok=True)
 
         gain_cmd = f"/usr/bin/amixer sset ADC {30}db"
@@ -301,6 +302,7 @@ class AudioPubSub(BaseMQTTPubSub):
 
 if __name__ == "__main__":
     recorder = AudioPubSub(
+        # TODO: Set sensible defaults, rather than 'None'? Or, use None itself?
         hostname=str(os.environ.get("HOSTNAME")),
         mqtt_ip=str(os.environ.get("MQTT_IP")),
         audio_filename_topic=str(os.environ.get("AUDIO_FILENAME_TOPIC")),
