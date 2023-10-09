@@ -312,6 +312,6 @@ if __name__ == "__main__":
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
         audio_device=str(os.environ.get("AUDIO_DEVICE")),
-        log_level=os.environ.get("LOG_LEVEL"),
+        log_level=str(os.environ.get("LOG_LEVEL")),
     )
     recorder.main()
