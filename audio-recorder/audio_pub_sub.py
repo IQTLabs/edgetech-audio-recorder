@@ -3,6 +3,7 @@ The AudioPubSub uses arecord and ffmpeg to record and save audio as .flac files.
 """
 import base64
 import json
+import logging
 import os
 from time import sleep
 from datetime import datetime
@@ -38,6 +39,7 @@ class AudioPubSub(BaseMQTTPubSub):
         audio_device: str,
         hostname: str,
         debug: bool = False,
+        log_level: str = "INFO",
         **kwargs: Any,
     ) -> None:
         """The AudioPubSub constructor takes broadcast and subscribe topics and file paths.
@@ -57,6 +59,8 @@ class AudioPubSub(BaseMQTTPubSub):
             file_prefix (str): the fixed beginning of each filename.
             debug (bool, optional): If the debug mode is turned on, log statements print to
             stdout. Defaults to False.
+            log_level (str): One of 'NOTSET', 'DEBUG', 'INFO', 'WARN',
+            'WARNING', 'ERROR', 'FATAL', 'CRITICAL'
         """
         # to override any keyword arguments in the base class
         super().__init__(**kwargs)
@@ -65,6 +69,7 @@ class AudioPubSub(BaseMQTTPubSub):
         self.audio_filename_topic = audio_filename_topic
         self.audio_clip_topic = audio_clip_topic
         self.debug = debug
+        self.log_level = log_level
         self.c2_topic = c2_topic
         self.audio_device = audio_device
         self.save_path = os.path.join(data_root, sensor_directory_name)
@@ -89,6 +94,7 @@ class AudioPubSub(BaseMQTTPubSub):
         os.makedirs(self.save_path, exist_ok=True)
 
         # set gain
+        # TODO: Remove?
         os.makedirs(self.save_path, exist_ok=True)
 
         gain_cmd = f"/usr/bin/amixer sset ADC {30}db"
@@ -108,6 +114,22 @@ class AudioPubSub(BaseMQTTPubSub):
 
         # trigger start recording audio
         self._record_audio()
+
+        # Log configuration parameters
+        logging.info(
+            f"""AudioPubSub initialized with parameters:
+    audio_filename_topic = {audio_filename_topic}
+    audio_clip_topic = {audio_clip_topic}
+    c2_topic = {c2_topic}
+    data_root = {data_root}
+    sensor_directory_name = {sensor_directory_name}
+    file_prefix = {file_prefix}
+    audio_device = {audio_device}
+    hostname = {hostname}
+    debug = {debug}
+    log_level = {log_level}
+            """
+        )
 
     def _send_data(self: Any, data: Dict[str, str]) -> None:
         """Function that takes a data payload containing a timestamp and the compressed audio
@@ -280,6 +302,9 @@ class AudioPubSub(BaseMQTTPubSub):
 
 if __name__ == "__main__":
     recorder = AudioPubSub(
+        # TODO: Set sensible defaults, rather than 'None'? Or, use None itself?
+        hostname=str(os.environ.get("HOSTNAME")),
+        mqtt_ip=str(os.environ.get("MQTT_IP")),
         audio_filename_topic=str(os.environ.get("AUDIO_FILENAME_TOPIC")),
         audio_clip_topic=str(os.environ.get("AUDIO_CLIP_TOPIC")),
         c2_topic=str(os.environ.get("C2_TOPIC")),
@@ -287,7 +312,6 @@ if __name__ == "__main__":
         sensor_directory_name=str(os.environ.get("AUDIO_SENSOR_DIR")),
         file_prefix=str(os.environ.get("AUDIO_FILE_PREFIX")),
         audio_device=str(os.environ.get("AUDIO_DEVICE")),
-        hostname=str(os.environ.get("HOSTNAME")),
-        mqtt_ip=str(os.environ.get("MQTT_IP")),
+        log_level=str(os.environ.get("LOG_LEVEL")),
     )
     recorder.main()
