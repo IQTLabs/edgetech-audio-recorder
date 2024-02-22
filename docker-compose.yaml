@@ -29,4 +29,5 @@ services:
     depends_on: 
       - mqtt
     env_file:
-      - .env
+      - path: ./audio-recorder.env
+        required: false
